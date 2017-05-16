@@ -39,7 +39,8 @@ bool createPostfixFromTokens(std::vector<Token> & postfix, std::vector<Token> & 
 float calculate(std::vector<Token> & postfix, float t);
 
 //f` = (f(x + h) - f(x - h)) / 2h
-float derivative(std::vector<Token> & postfix, float t);
+float derivative(float(*pFunc)(std::vector<Token>&, float), std::vector<Token> & postfix, float t);
+float derivative(float(*pFunc)(std::vector<Token>&, std::vector<Token>&, float), std::vector<Token> & postfixX, std::vector<Token> & postfixY, float t);
 
 //f`` = (f(x+h) - 2f(x) + f(x-h)) / h^2
 float derivative2(std::vector<Token> & postfix, float t);
@@ -50,5 +51,9 @@ std::vector<std::pair<float, float>> getVals(float(*pFunc)(std::vector<Token>&, 
 
 // Рассчет полной скорости
 float speed(std::vector<Token> & postfixX, std::vector<Token> & postfixY, float t);
-// и полного ускорения
+// полного ускорения
 float acceleration(std::vector<Token> & postfixX, std::vector<Token> & postfixY, float t);
+// Ускорения тангенциального
+float accelerationT(std::vector<Token> & postfixX, std::vector<Token> & postfixY, float t);
+// и нормального
+float accelerationN(std::vector<Token> & postfixX, std::vector<Token> & postfixY, float t);

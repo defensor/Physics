@@ -377,27 +377,35 @@ float calculate(std::vector<Token> & postfix, float t){
 }
 
 //f` = (f(x + h) - f(x - h)) / 2h
-float derivative(std::vector<Token> & postfix, float t){
-	if (!isfinite(calculate(postfix, t)))
+float derivative(float(*pFunc)(std::vector<Token>&, float), std::vector<Token> & postfix, float t){
+	if (!isfinite(pFunc(postfix, t)))
 		return NAN;
 	
-	float a = calculate(postfix, t + DT);
-	float b = calculate(postfix, t - DT);
+	float a = pFunc(postfix, t + DT);
+	float b = pFunc(postfix, t - DT);
 
 	a = std::floor(a * ACCURACYN + .5) / ACCURACYN;
 	b = std::floor(b * ACCURACYN + .5) / ACCURACYN;
 
-	/*if (!isfinite(a))
-		return a;
-	if (!isfinite(b))
-		return -b;*/
+	return (a - b) / (2 * DT);
+}
+
+float derivative(float(*pFunc)(std::vector<Token>&, std::vector<Token>&, float), std::vector<Token> & postfixX, std::vector<Token> & postfixY, float t){
+	if (!isfinite(pFunc(postfixX, postfixY, t)))
+		return NAN;
+
+	float a = pFunc(postfixX, postfixY, t + DT);
+	float b = pFunc(postfixX, postfixY, t - DT);
+
+	a = std::floor(a * ACCURACYN + .5) / ACCURACYN;
+	b = std::floor(b * ACCURACYN + .5) / ACCURACYN;
 
 	return (a - b) / (2 * DT);
 }
 
 //f`` = (f(x+h) - 2f(x) + f(x-h)) / h^2
 float derivative2(std::vector<Token> & postfix, float t){
-	if (!isfinite(derivative(postfix, t)))
+	if (!isfinite(derivative(calculate, postfix, t)))
 		return NAN;
 	
 	float a = calculate(postfix, t + DT);
@@ -439,8 +447,8 @@ std::vector<std::pair<float, float>> getVals(float(*pFunc)(std::vector<Token>&, 
 
 // Рассчет полной скорости
 float speed(std::vector<Token> & postfixX, std::vector<Token> & postfixY, float t){
-	float Vx = derivative(postfixX, t);
-	float Vy = derivative(postfixY, t);
+	float Vx = derivative(calculate, postfixX, t);
+	float Vy = derivative(calculate, postfixY, t);
 
 	if (!(isfinite(Vx) && isfinite(Vy)))
 		return NAN;
@@ -459,6 +467,29 @@ float acceleration(std::vector<Token> & postfixX, std::vector<Token> & postfixY,
 
 	float a = sqrt(ax*ax + ay*ay);
 	return a;
+}
+
+// Рассчет тангенциального ускорения
+float accelerationT(std::vector<Token> & postfixX, std::vector<Token> & postfixY, float t){
+
+	if (!isfinite(speed(postfixX, postfixY, t)))
+		return NAN;
+
+	float at = derivative(speed, postfixX, postfixY, t);
+	return at;
+}
+
+// Рассчет нормального ускорения
+float accelerationN(std::vector<Token> & postfixX, std::vector<Token> & postfixY, float t){
+	
+	if (!isfinite(speed(postfixX, postfixY, t)))
+		return NAN;
+
+	float a = acceleration(postfixX, postfixY, t);
+	float at = accelerationT(postfixX, postfixY, t);
+
+	float an = sqrt(a*a - at*at);
+	return an;
 }
 
 //int main(){

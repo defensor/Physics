@@ -1,46 +1,9 @@
-﻿Build started 16.05.2017 15:57:14.
-     1>Project "F:\Physics2.1\Physics2\Physics2.vcxproj" on node 2 (Build target(s)).
-     1>ClCompile:
-         D:\Program Files\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _WINDOWS /D _DEBUG /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MTd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Yu"stdafx.h" /Fp"Debug\Physics2.pch" /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt Physics2.cpp Physics2Dlg.cpp
-         Physics2Dlg.cpp
-     1>f:\physics2.1\physics2\physics2dlg.cpp(202): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
-     1>f:\physics2.1\physics2\physics2dlg.cpp(203): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
-     1>f:\physics2.1\physics2\physics2dlg.cpp(242): warning C4244: 'initializing' : conversion from 'double' to 'float', possible loss of data
-     1>f:\physics2.1\physics2\physics2dlg.cpp(243): warning C4244: 'initializing' : conversion from 'double' to 'float', possible loss of data
-     1>f:\physics2.1\physics2\physics2dlg.cpp(247): warning C4244: 'initializing' : conversion from 'float' to 'int', possible loss of data
-     1>f:\physics2.1\physics2\physics2dlg.cpp(248): warning C4244: 'initializing' : conversion from 'float' to 'int', possible loss of data
-     1>f:\physics2.1\physics2\physics2dlg.cpp(255): warning C4244: 'initializing' : conversion from 'LONG' to 'float', possible loss of data
-     1>f:\physics2.1\physics2\physics2dlg.cpp(259): warning C4244: 'initializing' : conversion from 'LONG' to 'float', possible loss of data
-     1>f:\physics2.1\physics2\physics2dlg.cpp(266): warning C4244: 'initializing' : conversion from 'LONG' to 'float', possible loss of data
-     1>f:\physics2.1\physics2\physics2dlg.cpp(270): warning C4244: 'initializing' : conversion from 'LONG' to 'float', possible loss of data
-     1>f:\physics2.1\physics2\physics2dlg.cpp(319): warning C4244: '=' : conversion from 'float' to 'LONG', possible loss of data
-     1>f:\physics2.1\physics2\physics2dlg.cpp(328): warning C4244: '=' : conversion from 'float' to 'LONG', possible loss of data
-     1>f:\physics2.1\physics2\physics2dlg.cpp(344): warning C4244: '=' : conversion from 'float' to 'LONG', possible loss of data
-     1>f:\physics2.1\physics2\physics2dlg.cpp(353): warning C4244: '=' : conversion from 'float' to 'LONG', possible loss of data
-     1>f:\physics2.1\physics2\physics2dlg.cpp(356): warning C4244: '=' : conversion from 'float' to 'LONG', possible loss of data
-     1>f:\physics2.1\physics2\physics2dlg.cpp(357): warning C4244: '=' : conversion from 'float' to 'LONG', possible loss of data
-     1>f:\physics2.1\physics2\physics2dlg.cpp(378): warning C4244: '-=' : conversion from 'float' to 'int', possible loss of data
-     1>f:\physics2.1\physics2\physics2dlg.cpp(386): warning C4244: '+=' : conversion from 'float' to 'int', possible loss of data
-     1>f:\physics2.1\physics2\physics2dlg.cpp(399): warning C4244: '+=' : conversion from 'float' to 'int', possible loss of data
-     1>f:\physics2.1\physics2\physics2dlg.cpp(407): warning C4244: '-=' : conversion from 'float' to 'int', possible loss of data
-     1>f:\physics2.1\physics2\physics2dlg.cpp(426): warning C4244: 'initializing' : conversion from 'double' to 'float', possible loss of data
-     1>f:\physics2.1\physics2\physics2dlg.cpp(428): warning C4244: 'initializing' : conversion from 'double' to 'float', possible loss of data
-     1>f:\physics2.1\physics2\physics2dlg.cpp(430): warning C4244: 'initializing' : conversion from 'double' to 'float', possible loss of data
-     1>f:\physics2.1\physics2\physics2dlg.cpp(490): warning C4018: '<' : signed/unsigned mismatch
-     1>f:\physics2.1\physics2\physics2dlg.cpp(494): warning C4018: '<' : signed/unsigned mismatch
-     1>f:\physics2.1\physics2\physics2dlg.cpp(499): warning C4018: '<' : signed/unsigned mismatch
-         Generating Code...
-         Skipping... (no relevant changes detected)
-         Physics2.cpp
-       Link:
-         D:\Program Files\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"F:\Physics2.1\Debug\Physics2.exe" /INCREMENTAL /NOLOGO /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /manifestinput:"D:\Program Files\Microsoft Visual Studio 12.0\VC\Include\Manifest\dpiaware.manifest" /DEBUG /PDB:"F:\Physics2.1\Debug\Physics2.pdb" /SUBSYSTEM:WINDOWS /TLBID:1 /ENTRY:"wWinMainCRTStartup" /DYNAMICBASE /NXCOMPAT /IMPLIB:"F:\Physics2.1\Debug\Physics2.lib" /MACHINE:X86 Debug\Physics2.res
-         Debug\Physics2.obj
-         Debug\Physics2Dlg.obj
-         Debug\PhysicsF.obj
-         Debug\stdafx.obj
-         Physics2.vcxproj -> F:\Physics2.1\Debug\Physics2.exe
-     1>Done Building Project "F:\Physics2.1\Physics2\Physics2.vcxproj" (Build target(s)).
+﻿Build started 16.05.2017 18:22:47.
+     1>Project "F:\GitHub\Physics\Physics\Physics2\Physics2.vcxproj" on node 2 (Build target(s)).
+     1>Link:
+         Physics2.vcxproj -> F:\GitHub\Physics\Physics\Debug\Physics2.exe
+     1>Done Building Project "F:\GitHub\Physics\Physics\Physics2\Physics2.vcxproj" (Build target(s)).
 
 Build succeeded.
 
-Time Elapsed 00:00:30.20
+Time Elapsed 00:00:01.89

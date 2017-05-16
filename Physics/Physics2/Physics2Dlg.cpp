@@ -478,6 +478,30 @@ void CPhysics2Dlg::OnBnClickedCalc()
 					SetSymb(0, LG_2D_AT); // Выводим необходимые символы
 				}
 			break;
+		case LG_2D_ATT:	// График aт(t)
+			yVarEditCtrl.GetWindowTextW(exprX);
+			xVarEditCtrl.GetWindowTextW(exprY);
+			if (createTokensFromExpression(exprX, tokensX) && createTokensFromExpression(exprY, tokensY)) // Получаем токены из строк
+				if (createPostfixFromTokens(postfixX, tokensX) && createPostfixFromTokens(postfixY, tokensY)){	// Получаем выражения из токенов
+					vals = getVals(accelerationT, postfixX, postfixY, stVal, edVal, stepVal);	// Рассчитываем значения ускорения,
+					writeGraphic(graphicCtrl, vals);					// выводим их на график
+					graphicCtrl.UpdateWindow();							// и перерисовываем окно
+
+					SetSymb(0, LG_2D_ATT); // Выводим необходимые символы
+				}
+			break;
+		case LG_2D_ANT:	// График an(t)
+			yVarEditCtrl.GetWindowTextW(exprX);
+			xVarEditCtrl.GetWindowTextW(exprY);
+			if (createTokensFromExpression(exprX, tokensX) && createTokensFromExpression(exprY, tokensY)) // Получаем токены из строк
+				if (createPostfixFromTokens(postfixX, tokensX) && createPostfixFromTokens(postfixY, tokensY)){	// Получаем выражения из токенов
+					vals = getVals(accelerationN, postfixX, postfixY, stVal, edVal, stepVal);	// Рассчитываем значения ускорения,
+					writeGraphic(graphicCtrl, vals);					// выводим их на график
+					graphicCtrl.UpdateWindow();							// и перерисовываем окно
+
+					SetSymb(0, LG_2D_ANT); // Выводим необходимые символы
+				}
+			break;
 		case LG_2D_YX:	// График пути
 			xVarEditCtrl.GetWindowTextW(exprX);
 			yVarEditCtrl.GetWindowTextW(exprY);
