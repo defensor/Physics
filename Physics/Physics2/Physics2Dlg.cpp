@@ -197,12 +197,6 @@ void CPhysics2Dlg::writeGraphic(CAnimateCtrl & graphCtrl, std::vector<std::pair<
 		return;
 	}
 
-	// Первым делом избавляемся от аномалий в числах (аля 0 == 10^[-11])
-	for (std::vector<std::pair<float, float>>::iterator i = XY.begin(); i < XY.end(); i++){
-		i->first = std::floor((i->first) * ACCURACYN + .5) / ACCURACYN;
-		i->second = std::floor((i->second) * ACCURACYN + .5) / ACCURACYN;
-	}
-
 	// Определяем границы по оси X
 	float maxX = 0, minX = 0;
 	size_t i;
@@ -313,8 +307,8 @@ void CPhysics2Dlg::writeGraphic(CAnimateCtrl & graphCtrl, std::vector<std::pair<
 			int k = 1;
 			float sum = XY[i].first;
 			if (i && isfinite(XY[i - 1].first) && isfinite(XY[i - 1].second)){ // Если есть предыдущая точка
-				sum += 10 * XY[i - 1].first;	 // то сдвигаем точку в её сторону
-				k += 10;
+				sum += 7 * XY[i - 1].first;	 // то сдвигаем точку в её сторону
+				k += 7;
 			}
 			pI.x = rect.left + dx + sum / k * kx;
 
@@ -322,8 +316,8 @@ void CPhysics2Dlg::writeGraphic(CAnimateCtrl & graphCtrl, std::vector<std::pair<
 			k = 1;
 			sum = XY[i].first;
 			if (i < XY.size() - 1 && isfinite(XY[i + 1].first) && isfinite(XY[i + 1].second)){ // Если есть следующая точка
-				sum += 10 * XY[i + 1].first;					// то сдвигаем точку в её сторону
-				k += 10;
+				sum += 7 * XY[i + 1].first;					// то сдвигаем точку в её сторону
+				k += 7;
 			}
 			pO.x = rect.left + dx + sum / k * kx;
 		}
@@ -338,8 +332,8 @@ void CPhysics2Dlg::writeGraphic(CAnimateCtrl & graphCtrl, std::vector<std::pair<
 			int k = 1;
 			float sum = XY[i].second;
 			if (i && isfinite(XY[i - 1].first) && isfinite(XY[i - 1].second)){ // Если есть предыдущая точка
-				sum += 10 * XY[i - 1].second;	 // то сдвигаем точку в её сторону
-				k += 10;
+				sum += 7 * XY[i - 1].second;	 // то сдвигаем точку в её сторону
+				k += 7;
 			}
 			pI.y = rect.bottom - dy - sum / k * ky;
 
@@ -347,8 +341,8 @@ void CPhysics2Dlg::writeGraphic(CAnimateCtrl & graphCtrl, std::vector<std::pair<
 			k = 1;
 			sum = XY[i].second;
 			if (i < XY.size() && isfinite(XY[i + 1].first) && isfinite(XY[i + 1].second)){ // Если есть предыдущая точка
-				sum += 10 * XY[i + 1].second;	 // то сдвигаем точку в её сторону
-				k += 10;
+				sum += 7 * XY[i + 1].second;	 // то сдвигаем точку в её сторону
+				k += 7;
 			}
 			pO.y = rect.bottom - dy - sum / k * ky;
 		}
@@ -455,8 +449,8 @@ void CPhysics2Dlg::OnBnClickedCalc()
 				}
 			break;
 		case LG_2D_VT:	// График V(t)
-			yVarEditCtrl.GetWindowTextW(exprX);
-			xVarEditCtrl.GetWindowTextW(exprY);
+			xVarEditCtrl.GetWindowTextW(exprX);
+			yVarEditCtrl.GetWindowTextW(exprY);
 			if (createTokensFromExpression(exprX, tokensX) && createTokensFromExpression(exprY, tokensY)) // Получаем токены из строк
 				if (createPostfixFromTokens(postfixX, tokensX) && createPostfixFromTokens(postfixY, tokensY)){	// Получаем выражения из токенов
 					vals = getVals(speed, postfixX, postfixY, stVal, edVal, stepVal);	// Рассчитываем значения скорости,
@@ -467,8 +461,8 @@ void CPhysics2Dlg::OnBnClickedCalc()
 				}
 			break;
 		case LG_2D_AT:	// График a(t)
-			yVarEditCtrl.GetWindowTextW(exprX);
-			xVarEditCtrl.GetWindowTextW(exprY);
+			xVarEditCtrl.GetWindowTextW(exprX);
+			yVarEditCtrl.GetWindowTextW(exprY);
 			if (createTokensFromExpression(exprX, tokensX) && createTokensFromExpression(exprY, tokensY)) // Получаем токены из строк
 				if (createPostfixFromTokens(postfixX, tokensX) && createPostfixFromTokens(postfixY, tokensY)){	// Получаем выражения из токенов
 					vals = getVals(acceleration, postfixX, postfixY, stVal, edVal, stepVal);	// Рассчитываем значения ускорения,
@@ -479,8 +473,8 @@ void CPhysics2Dlg::OnBnClickedCalc()
 				}
 			break;
 		case LG_2D_ATT:	// График aт(t)
-			yVarEditCtrl.GetWindowTextW(exprX);
-			xVarEditCtrl.GetWindowTextW(exprY);
+			xVarEditCtrl.GetWindowTextW(exprX);
+			yVarEditCtrl.GetWindowTextW(exprY);
 			if (createTokensFromExpression(exprX, tokensX) && createTokensFromExpression(exprY, tokensY)) // Получаем токены из строк
 				if (createPostfixFromTokens(postfixX, tokensX) && createPostfixFromTokens(postfixY, tokensY)){	// Получаем выражения из токенов
 					vals = getVals(accelerationT, postfixX, postfixY, stVal, edVal, stepVal);	// Рассчитываем значения ускорения,
@@ -491,8 +485,8 @@ void CPhysics2Dlg::OnBnClickedCalc()
 				}
 			break;
 		case LG_2D_ANT:	// График an(t)
-			yVarEditCtrl.GetWindowTextW(exprX);
-			xVarEditCtrl.GetWindowTextW(exprY);
+			xVarEditCtrl.GetWindowTextW(exprX);
+			yVarEditCtrl.GetWindowTextW(exprY);
 			if (createTokensFromExpression(exprX, tokensX) && createTokensFromExpression(exprY, tokensY)) // Получаем токены из строк
 				if (createPostfixFromTokens(postfixX, tokensX) && createPostfixFromTokens(postfixY, tokensY)){	// Получаем выражения из токенов
 					vals = getVals(accelerationN, postfixX, postfixY, stVal, edVal, stepVal);	// Рассчитываем значения ускорения,
