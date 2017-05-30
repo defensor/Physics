@@ -9,13 +9,20 @@
 #include <locale.h>
 #include <math.h>
 
-#define ACCURACY 1e-6
-#define ACCURACYN 1e+6
+#define ACCURACY 1e-9
+#define ACCURACYN 1e+9
 
+#define STEP 1e-3
 
 #define MAX2(a, b) (((a) > (b)) ? (a) : (b))
 #define MIN2(a, b) (((a) < (b)) ? (a) : (b))
 #define MAX3(a,b,c) (MAX2(MAX2((a), (b)), (c)))
+
+struct FPOINT{
+	double x;
+	double y;
+};
+
 
 enum tokentype{
 	VAR, NUM, OP_BR, CL_BR, FUNC, OP, OP_SBR, CL_SBR
@@ -36,24 +43,25 @@ bool createTokensFromExpression(CString & expr, std::vector<Token> & tokens);
 bool createPostfixFromTokens(std::vector<Token> & postfix, std::vector<Token> & tokens);
 
 // Подсчет постфиксного выражения записанного токенами
-float calculate(std::vector<Token> & postfix, float t);
+double calculate(std::vector<Token> & postfix, double t);
 
 //f` = (f(x + h) - f(x - h)) / 2h
-float derivative(float(*pFunc)(std::vector<Token>&, float), std::vector<Token> & postfix, float t);
-float derivative(float(*pFunc)(std::vector<Token>&, std::vector<Token>&, float), std::vector<Token> & postfixX, std::vector<Token> & postfixY, float t);
+double derivative(double(*pFunc)(std::vector<Token>&, double), std::vector<Token> & postfix, double t);
+double derivative(double(*pFunc)(std::vector<Token>&, std::vector<Token>&, double), std::vector<Token> & postfixX, std::vector<Token> & postfixY, double t);
 
 //f`` = (f(x+h) - 2f(x) + f(x-h)) / h^2
-float derivative2(std::vector<Token> & postfix, float t);
+double derivative2(std::vector<Token> & postfix, double t);
 
 // Функция рассчитывающая массив значений выражения
-std::vector<std::pair<float, float>> getVals(float(*pFunc)(std::vector<Token>&, float), std::vector<Token> & postfix, float stVal, float edVal, float stepVal);
-std::vector<std::pair<float, float>> getVals(float(*pFunc)(std::vector<Token>&, std::vector<Token>&, float), std::vector<Token> & postfix1, std::vector<Token> & postfix2, float stVal, float edVal, float stepVal);
+std::vector<std::pair<double, double>> getVals(double(*pFunc)(std::vector<Token>&, double), std::vector<Token> & postfix, double stVal, double edVal);
+std::vector<std::pair<double, double>> getVals(double(*pFunc)(std::vector<Token>&, std::vector<Token>&, double), std::vector<Token> & postfix1, std::vector<Token> & postfix2, double stVal, double edVal);
 
 // Рассчет полной скорости
-float speed(std::vector<Token> & postfixX, std::vector<Token> & postfixY, float t);
+double speed(std::vector<Token> & postfixX, std::vector<Token> & postfixY, double t);
+double angleSpeed(std::vector<Token> & postfixX, std::vector<Token> & postfixY, double t);
 // полного ускорения
-float acceleration(std::vector<Token> & postfixX, std::vector<Token> & postfixY, float t);
+double acceleration(std::vector<Token> & postfixX, std::vector<Token> & postfixY, double t);
 // Ускорения тангенциального
-float accelerationT(std::vector<Token> & postfixX, std::vector<Token> & postfixY, float t);
+double accelerationT(std::vector<Token> & postfixX, std::vector<Token> & postfixY, double t);
 // и нормального
-float accelerationN(std::vector<Token> & postfixX, std::vector<Token> & postfixY, float t);
+double accelerationN(std::vector<Token> & postfixX, std::vector<Token> & postfixY, double t);

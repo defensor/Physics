@@ -5,12 +5,25 @@
 
 //#define MY_INFINITE_POS 1e+50
 //#define MY_INFINITE_NEG -(1e+50)
-#define DT 1e-4
+#define DT 1e-3
 
 
+FILE * logFile = fopen("file.log", "w");
+
+// Знаю, что криво, но других идей как то нет
 namespace my{
-	float floor(float a){
-		return (abs(a) > ACCURACY) ? (std::floor(a * ACCURACYN + .5) / ACCURACYN) : (0);
+	double floor(double a){
+		if (isnan(a))
+			return a;
+		if (a > 1e+13)
+			return INFINITY;
+		if (a < -1e+13)
+			return -INFINITY;
+
+		return a;
+		/*if (!isfinite(a))
+			return NAN;
+		return (abs(a) > ACCURACY) ? (std::floor(a * ACCURACYN + .5) / ACCURACYN) : (0);*/
 	}
 }
 
@@ -268,13 +281,13 @@ bool createPostfixFromTokens(std::vector<Token> & postfix, std::vector<Token> & 
 
 
 // Подсчет постфиксного выражения записанного токенами
-float calculate(std::vector<Token> & postfix, float t){
-	float pi = 3.14159265;
-	float e = 2.71828182;
+double calculate(std::vector<Token> & postfix, double t){
+	double pi = 3.14159265;
+	double e = 2.71828182;
 
-	std::stack<float> fStack;
+	std::stack<double> fStack;
 
-	float a, b;
+	double a, b;
 
 	for (int i = 0; i < postfix.size(); i++){
 		switch (postfix[i].type){
@@ -348,10 +361,10 @@ float calculate(std::vector<Token> & postfix, float t){
 			a = fStack.top();
 			fStack.pop();
 			if (postfix[i].name == "sin"){
-				fStack.push(sin(a * pi / 180));
+				fStack.push(sin(a));
 			}
 			else if (postfix[i].name == "cos"){
-				fStack.push(cos(a * pi / 180));
+				fStack.push(cos(a));
 			}
 			else if (postfix[i].name == "asin"){
 				fStack.push(asin(a));
@@ -360,10 +373,10 @@ float calculate(std::vector<Token> & postfix, float t){
 				fStack.push(acos(a));
 			}
 			else if (postfix[i].name == "tg"){
-				fStack.push(tan(a * pi / 180));
+				fStack.push(tan(a));
 			}
 			else if (postfix[i].name == "ctg"){
-				fStack.push(1 / tan(a * pi / 180));
+				fStack.push(1 / tan(a));
 			}
 			else if (postfix[i].name == "atg"){
 				fStack.push(atan(a));
@@ -375,22 +388,16 @@ float calculate(std::vector<Token> & postfix, float t){
 		}
 	}
 
-	float result = fStack.top();
+	double result = fStack.top();
 	fStack.pop();
 
-	return result;
+	return my::floor(result);
 }
 
 
-float derivative(float(*pFunc)(std::vector<Token>&, float), std::vector<Token> & postfix, float t){	
-	float n = pFunc(postfix, t);
-	
-	if (!isfinite(n)){
-		return n;
-	}
-	
-	float a = pFunc(postfix, t + DT);
-	float b = pFunc(postfix, t - DT);
+double derivative(double(*pFunc)(std::vector<Token>&, double), std::vector<Token> & postfix, double t){		
+	double a = pFunc(postfix, t + DT);
+	double b = pFunc(postfix, t);
 
 	if (!(isfinite(a) && isfinite(b))){
 		if (isnan(a) || isnan(b))
@@ -403,28 +410,25 @@ float derivative(float(*pFunc)(std::vector<Token>&, float), std::vector<Token> &
 			return a;
 		
 		if (isinf(b))
-			return b;
-
-		return NAN;
+			return NAN;
 	}
 	a = my::floor(a);
 	b = my::floor(b);
 
-	float d = (a - b);
-	d /= 2 * DT;
+	double d = (a - b) / DT;
 
-	return d;
+	return my::floor(d);
 }
 
-float derivative(float(*pFunc)(std::vector<Token>&, std::vector<Token>&, float), std::vector<Token> & postfixX, std::vector<Token> & postfixY, float t){
-	float n = pFunc(postfixX, postfixY, t);
+double derivative(double(*pFunc)(std::vector<Token>&, std::vector<Token>&, double), std::vector<Token> & postfixX, std::vector<Token> & postfixY, double t){
+	double n = pFunc(postfixX, postfixY, t);
 
 	if (!isfinite(n)){
-		return n;
+		return NAN;
 	}
 
-	float a = pFunc(postfixX, postfixY, t + DT);
-	float b = pFunc(postfixX, postfixY, t - DT);
+	double a = pFunc(postfixX, postfixY, t + DT);
+	double b = pFunc(postfixX, postfixY, t);
 
 	if (!(isfinite(a) && isfinite(b))){
 		if (isnan(a) || isnan(b))
@@ -437,24 +441,21 @@ float derivative(float(*pFunc)(std::vector<Token>&, std::vector<Token>&, float),
 			return a;
 
 		if (isinf(b))
-			return b;
-		
-		return NAN;
+			return NAN;
 	}
 	a = my::floor(a);
 	b = my::floor(b);
 
-	float d = (a - b);
-	d /= (2 * DT);
+	double d = my::floor(a - b) / DT;
 
-	return d;
+	return my::floor(d);
 }
 
 
-float derivative2(std::vector<Token> & postfix, float t){
-	float a = derivative(calculate, postfix, t + DT);
-	float b = derivative(calculate, postfix, t);
-	float c = derivative(calculate, postfix, t - DT);
+double derivative2(std::vector<Token> & postfix, double t){
+	double a = my::floor(calculate(postfix, t + DT));
+	double b = my::floor(calculate(postfix, t));
+	double c = my::floor(calculate(postfix, t - DT));
 	 
 	if (!(isfinite(a) && isfinite(b) && isfinite(c))){
 		if (isnan(a) || isnan(b) || isnan(c))
@@ -464,54 +465,77 @@ float derivative2(std::vector<Token> & postfix, float t){
 			return a;
 
 		if (isinf(b))
-			return b;
+			return NAN;
 
 		if (isinf(c))
-			return c;
+			return -c;
 
 		return NAN;
 	}
 
-	a = my::floor(a);
-	b = my::floor(b);
-	c = my::floor(c);
+	double d2 = my::floor(a - b) / DT;
+	d2 += my::floor(c - b) / DT;
+	d2 /= DT;
 
-	float d2 = (a - 2 * b + c);
-	d2 /= (DT*DT);
+	//double d2 = (a - b + c - b) / (DT*DT);
 
-	return d2;
+	return my::floor(d2);
 }
 
 // Функция рассчитывающая массив значений выражения
-std::vector<std::pair<float, float>> getVals(float(*pFunc)(std::vector<Token>&, float), std::vector<Token> & postfix, float stVal, float edVal, float stepVal){
-	std::vector<std::pair<float, float>> val;
+std::vector<std::pair<double, double>> getVals(double(*pFunc)(std::vector<Token>&, double), std::vector<Token> & postfix, double stVal, double edVal){
+	std::vector<std::pair<double, double>> val;
 
-	for (float x = stVal; x <= edVal; x = my::floor(x + stepVal)){
+	for (double x = stVal; x <= edVal; x = my::floor(x + STEP)){
 		if (abs(x) < ACCURACY) // Если есть 0, то пусть будет и -0
 			val.push_back({ -x, my::floor(pFunc(postfix, -x)) });
 
 		val.push_back({ x, my::floor(pFunc(postfix, x)) });
 	}
 
+	fprintf(logFile, "postfix: ");
+	for (int i = 0; i < postfix.size(); i++)
+		fprintf(logFile, "%s ", postfix[i]);
+
+	fprintf(logFile, "\n");
+
+	for (int i = 0; i < val.size(); i++)
+		fprintf(logFile, "%f : %f\n", val[i].first, val[i].second);
+
 	return val;
 }
 // Она же, только для 2 выражений
-std::vector<std::pair<float, float>> getVals(float(*pFunc)(std::vector<Token>&, std::vector<Token>&, float), std::vector<Token> & postfix1, std::vector<Token> & postfix2, float stVal, float edVal, float stepVal){
-	std::vector<std::pair<float, float>> val;
+std::vector<std::pair<double, double>> getVals(double(*pFunc)(std::vector<Token>&, std::vector<Token>&, double), std::vector<Token> & postfix1, std::vector<Token> & postfix2, double stVal, double edVal){
+	std::vector<std::pair<double, double>> val;
 	
-	for (float x = stVal; x <= edVal; x = my::floor(x + stepVal)){
+	for (double x = stVal; x <= edVal; x = my::floor(x + STEP)){
 		if (abs(x) < ACCURACY) // Если есть 0, то пусть будет и -0
 			val.push_back({ -x, my::floor(pFunc(postfix1, postfix2, -x)) });
 		val.push_back({ x, my::floor(pFunc(postfix1, postfix2, x)) });
 	}
 
+
+	fprintf(logFile, "postfix1: ");
+	for (int i = 0; i < postfix1.size(); i++)
+		fprintf(logFile, "%s ", postfix1[i]);
+	fprintf(logFile, "\n");
+
+	fprintf(logFile, "postfix2: ");
+	for (int i = 0; i < postfix2.size(); i++)
+		fprintf(logFile, "%s ", postfix2[i]);
+	fprintf(logFile, "\n");
+
+	for (int i = 0; i < val.size(); i++)
+		fprintf(logFile, "%f : %f\n", val[i].first, val[i].second);
+
+
 	return val;
 }
 
 // Рассчет полной скорости
-float speed(std::vector<Token> & postfixX, std::vector<Token> & postfixY, float t){
-	float Vx = derivative(calculate, postfixX, t);
-	float Vy = derivative(calculate, postfixY, t);
+double speed(std::vector<Token> & postfixX, std::vector<Token> & postfixY, double t){
+	double Vx = my::floor(derivative(calculate, postfixX, t));
+	double Vy = my::floor(derivative(calculate, postfixY, t));
 
 	if (!(isfinite(Vx) && isfinite(Vy))){
 		if (isnan(Vx) || isnan(Vy))
@@ -521,25 +545,40 @@ float speed(std::vector<Token> & postfixX, std::vector<Token> & postfixY, float 
 			return NAN; // то результат неопределенность
 
 		if (isinf(Vx))
-			return abs(Vx);
+			return Vx;
 
 		if (isinf(Vy))
-			return abs(Vy);
-
-		return NAN;
+			return Vy;
 	}
 
-	Vx = my::floor(Vx);
-	Vy = my::floor(Vy);
-
-	float V = sqrt(Vx*Vx + Vy*Vy);
+	double V = my::floor(sqrt(Vx*Vx + Vy*Vy));
 	return V;
 }
 
+// Рассчет угловой скорости
+double angleSpeed(std::vector<Token> & postfixX, std::vector<Token> & postfixY, double t){
+	FPOINT p1;
+	FPOINT p2;
+
+	p1.x = calculate(postfixX, t);
+	p1.y = calculate(postfixY, t);
+
+	p2.x = calculate(postfixX, t+DT);
+	p2.y = calculate(postfixY, t+DT);
+
+	double len1 = sqrt(p1.x*p1.x + p1.y*p1.y);
+	double len2 = sqrt(p2.x*p2.x + p2.y*p2.y);
+	double mul12 = p1.x*p2.x + p1.y*p2.y;
+
+	double angle = mul12 / (len1 * len2);
+
+	return angle;
+}
+
 // Рассчет полного ускорения
-float acceleration(std::vector<Token> & postfixX, std::vector<Token> & postfixY, float t){
-	float ax = derivative2(postfixX, t);
-	float ay = derivative2(postfixY, t);
+double acceleration(std::vector<Token> & postfixX, std::vector<Token> & postfixY, double t){
+	double ax = my::floor(derivative2(postfixX, t));
+	double ay = my::floor(derivative2(postfixY, t));
 
 	if (!(isfinite(ax) && isfinite(ay))){
 		if (isnan(ax) || isnan(ay))
@@ -553,50 +592,51 @@ float acceleration(std::vector<Token> & postfixX, std::vector<Token> & postfixY,
 
 		if (isinf(ay))
 			return abs(ay);
-
-		return NAN;
 	}
 
-	ax = my::floor(ax);
-	ay = my::floor(ay);
-
-	float a = sqrt(ax*ax + ay*ay);
+	double a = my::floor(sqrt(ax*ax + ay*ay));
 	return a;
 }
 
 // Рассчет тангенциального ускорения
-float accelerationT(std::vector<Token> & postfixX, std::vector<Token> & postfixY, float t){
-	float at = derivative(speed, postfixX, postfixY, t);
+double accelerationT(std::vector<Token> & postfixX, std::vector<Token> & postfixY, double t){
+	double at = my::floor(derivative(speed, postfixX, postfixY, t));
 	return at;
 }
 
-// Рассчет нормального ускорения
-float accelerationN(std::vector<Token> & postfixX, std::vector<Token> & postfixY, float t){
-	float a = acceleration(postfixX, postfixY, t);
-	float at = accelerationT(postfixX, postfixY, t);
-
-	if (!(isfinite(a) && isfinite(at))){
-		if (isnan(a) || isnan(at))
-			return NAN;
-
-		if (isinf(a) && isinf(at)) // Если ускорения это две бесконечности
-			return NAN; // то результат неопределенность
-		
-		if (isinf(a))
-			return abs(a);
-
-		if (isinf(at))
-			return abs(at);
-
-		return NAN;
-	}
-
-	a = my::floor(a);
-	at = my::floor(at);
-
-	float an = sqrt(a*a - at*at);
+// Рассчет тангенциального ускорения
+double accelerationN(std::vector<Token> & postfixX, std::vector<Token> & postfixY, double t){
+	double an = my::floor(derivative(angleSpeed, postfixX, postfixY, t));
 	return an;
 }
+
+// Рассчет нормального ускорения
+//double accelerationN(std::vector<Token> & postfixX, std::vector<Token> & postfixY, double t){
+//	double a = acceleration(postfixX, postfixY, t);
+//	double at = accelerationT(postfixX, postfixY, t);
+//
+//	if (!(isfinite(a) && isfinite(at))){
+//		if (isnan(a) || isnan(at))
+//			return NAN;
+//
+//		if (isinf(a) && isinf(at)) // Если ускорения это две бесконечности
+//			return NAN; // то результат неопределенность
+//		
+//		if (isinf(a))
+//			return abs(a);
+//
+//		if (isinf(at))
+//			return NAN;
+//
+//		return NAN;
+//	}
+//
+//	a = my::floor(a);
+//	at = my::floor(at);
+//
+//	double an = my::floor(sqrt(a*a - at*at));
+//	return an;
+//}
 
 //int main(){
 //	setlocale(LC_CTYPE, "rus");
@@ -612,7 +652,7 @@ float accelerationN(std::vector<Token> & postfixX, std::vector<Token> & postfixY
 //			printf("\n");
 //		}
 //
-//	for (float t = 9.8; t < 1000; t += 5){
+//	for (double t = 9.8; t < 1000; t += 5){
 //		cout << "f(" << t << ") = " << calculate(postfix, t) << endl;
 //		cout << "f`(" << t << ") = " << derivative(postfix, t) << endl;
 //		cout << "f``(" << t << ") = " << derivative2(postfix, t) << endl;

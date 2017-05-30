@@ -64,25 +64,22 @@ CPhysics2Dlg::CPhysics2Dlg(CWnd* pParent /*=NULL*/)
 void CPhysics2Dlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
-	DDX_Radio(pDX, IDC_RADIO_2D, radio);
 	DDX_Control(pDX, IDC_EDIT_2D_X, xVarEditCtrl);
 	DDX_Control(pDX, IDC_GRAPHIC, graphicCtrl);
 	DDX_Control(pDX, IDC_EDIT_2D_Y, yVarEditCtrl);
-	DDX_Control(pDX, IDC_EDIT_RND, fVarEditCtrl);
 	DDX_Control(pDX, IDC_2D_X, Symb2D_XCtrl);
 	DDX_Control(pDX, IDC_2D_Y, Symb2D_YCtrl);
-	DDX_Control(pDX, IDC_RND_F, SymbRND_FCtrl);
 	DDX_Control(pDX, IDC_V_2D, Symb2D_VCtrl);
-	DDX_Control(pDX, IDC_V_RND, SymbRND_VCtrl);
 	DDX_Control(pDX, IDC_LIST_OF_GRAPHS, listOfGraphsCtrl);
 	DDX_Control(pDX, IDC_AT, Symb_AtCtrl);
 	DDX_Control(pDX, IDC_AN, Symb_AnCtrl);
 	DDX_Control(pDX, IDC_A, Symb_ACtrl);
 	DDX_Control(pDX, IDC_H_X, Symb_H_XCtrl);
 	DDX_Control(pDX, IDC_H_T, Symb_H_TCtrl);
-	DDX_Control(pDX, IDC_T_STVAL_EDIT, tStValCtrl);
-	DDX_Control(pDX, IDC_T_EDVAL_EDIT, tEdValCtrl);
-	DDX_Control(pDX, IDC_T_STEPVAL_EDIT, tStepValCtrl);
+	DDX_Control(pDX, IDC_ABSC_STVAL_EDIT, abscStValCtrl);
+	DDX_Control(pDX, IDC_ABSC_EDVAL_EDIT, abscEdValCtrl);
+	DDX_Control(pDX, IDC_ORD_STVAL_EDIT, ordStValCtrl);
+	DDX_Control(pDX, IDC_ORD_EDVAL_EDIT, ordEdValCtrl);
 }
 
 BEGIN_MESSAGE_MAP(CPhysics2Dlg, CDialogEx)
@@ -90,8 +87,6 @@ BEGIN_MESSAGE_MAP(CPhysics2Dlg, CDialogEx)
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
 	ON_BN_CLICKED(ID_CALC, &CPhysics2Dlg::OnBnClickedCalc)
-	ON_BN_CLICKED(IDC_RADIO_2D, &CPhysics2Dlg::OnBnClickedRadio2d)
-	ON_BN_CLICKED(IDC_RADIO_RND, &CPhysics2Dlg::OnBnClickedRadioRnd)
 END_MESSAGE_MAP()
 
 
@@ -126,7 +121,22 @@ BOOL CPhysics2Dlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// Мелкий значок
 
 	// TODO: добавьте дополнительную инициализацию
-	OnBnClickedRadio2d();
+	// Настраиваем список графиков
+	listOfGraphsCtrl.ResetContent();
+	listOfGraphsCtrl.InsertString(LG_2D_XT, L"x(t)");
+	listOfGraphsCtrl.InsertString(LG_2D_YT, L"y(t)");
+	listOfGraphsCtrl.InsertString(LG_2D_VT, L"V(t)");
+	listOfGraphsCtrl.InsertString(LG_2D_AT, L"a(t)");
+	listOfGraphsCtrl.InsertString(LG_2D_ANT, L"an(t)");
+	listOfGraphsCtrl.InsertString(LG_2D_ATT, L"aт(t)");
+	listOfGraphsCtrl.InsertString(LG_2D_YX, L"y(x)");
+	listOfGraphsCtrl.SetCurSel(0);
+
+	// Устанавливаем нужные символы
+	SetSymb(0);
+
+	ordStValCtrl.SetWindowTextW(L"0");
+	abscStValCtrl.SetWindowTextW(L"0");
 
 	return TRUE;  // возврат значения TRUE, если фокус не передан элементу управления
 }
@@ -181,7 +191,7 @@ HCURSOR CPhysics2Dlg::OnQueryDragIcon()
 }
 
 // Функция отрисовки графика (для простоты не парюсь с отрицательными значениями x > 0, значит мне нужны 1 и 4 четверти гафика, ось OX всегда слева)
-void CPhysics2Dlg::writeGraphic(CAnimateCtrl & graphCtrl, std::vector<std::pair<float, float>> & XY){
+void CPhysics2Dlg::writeGraphic(CAnimateCtrl & graphCtrl, std::vector<std::pair<double, double>> & XY, FRECT valRect){
 	CPaintDC * dc = (CPaintDC*)graphCtrl.GetDC();
 	CFont * oldFont = dc->SelectObject(&acrossFont);		// Подключаем Горизонтальный шрифт
 
@@ -198,72 +208,83 @@ void CPhysics2Dlg::writeGraphic(CAnimateCtrl & graphCtrl, std::vector<std::pair<
 	}
 
 	// Определяем границы по оси X
-	float maxX = 0, minX = 0;
+	double maxX = valRect.right,
+		minX = valRect.left;
 	size_t i;
-	for (i = 0; i < XY.size() && !isfinite(XY[i].first); i++); // ищем первое конечное число
-	if (i < XY.size())					// если нашли
-		maxX = minX = XY[i].first;	// запоминаем его как максимум и минимум
+	//for (i = 0; i < XY.size() && !isfinite(XY[i].first); i++); // ищем первое конечное число
+	//if (i < XY.size())					// если нашли
+	//	maxX = minX = XY[i].first;	// запоминаем его как максимум и минимум
 
-	for (std::vector<std::pair<float, float>>::const_iterator ci = XY.begin() + i; ci < XY.end(); ci++){
-		if (ci->first > maxX && isfinite(ci->first)) // Ищем максимум
-			maxX = ci->first;
-		else if (ci->first < minX && isfinite(ci->first)) // и мимнимум фукции
-			minX = ci->first;
-	}
+	//for (std::vector<std::pair<double, double>>::const_iterator ci = XY.begin() + i; ci < XY.end(); ci++){
+	//	if (ci->first > maxX && isfinite(ci->first)) // Ищем максимум
+	//		maxX = ci->first;
+	//	else if (ci->first < minX && isfinite(ci->first)) // и мимнимум фукции
+	//		minX = ci->first;
+	//}
 
 	// Определяем границы по оси y
-	float maxY = 0, minY = 0;
+	double maxY = 0, minY = 0;
+
 	for (i = 0; i < XY.size() && !isfinite(XY[i].second); i++); // ищем первое конечное число
 	if (i < XY.size())					// если нашли
 		maxY = minY = XY[i].second;	// запоминаем его как максимум и минимум
 
-	for (std::vector<std::pair<float, float>>::const_iterator ci = XY.begin() + i; ci < XY.end(); ci++){
-		if (ci->second > maxY && isfinite(ci->second)) // Ищем максимум
-			maxY = ci->second;
-		else if (ci->second < minY && isfinite(ci->second)) // и мимнимум фукции
-			minY = ci->second;
-	}
+	if (isfinite(valRect.top))
+		maxY = valRect.top;
+	else
+		for (std::vector<std::pair<double, double>>::const_iterator ci = XY.begin() + i; ci < XY.end(); ci++){
+			if (ci->second > maxY && isfinite(ci->second)) // Ищем максимум
+				maxY = ci->second;
+		}
+
+	if (isfinite(valRect.bottom))
+		minY = valRect.bottom;
+	else
+		for (std::vector<std::pair<double, double>>::const_iterator ci = XY.begin() + i; ci < XY.end(); ci++){
+			if (ci->second < minY && isfinite(ci->second)) // и мимнимум фукции
+				minY = ci->second;
+		}
 
 	// Считаем диапазон значений y и X
-	float xDiap = MAX3(maxX - minX, maxX, abs(minX));
-	float yDiap = MAX3(maxY - minY, maxY, abs(minY));
+	double xDiap = MAX3(maxX - minX, maxX, abs(minX));
+	double yDiap = MAX3(maxY - minY, maxY, abs(minY));
 
 	// Считаем размер шага штрихов по оси Y
-	float stepX = xDiap / 10;
-	float stepY = yDiap / 10;
+	double stepX = xDiap / 10;
+	double stepY = yDiap / 10;
 
 	// Коэффициенты для вывода графика в окно
-	float kx = (rect.right - (rect.left + (minX >= 0 || maxX <= 0) ? 14 : 0)) / (xDiap * 1.2/*Запас, чтобы красиво было*/);
-	float ky = (rect.bottom - (rect.top + (minY >= 0 || maxY <= 0) ? 14 : 0)) / (yDiap * 1.2/*Запас, чтобы красиво было*/);
+	double kx = (double)(rect.right - (rect.left + (minX >= 0 || maxX <= 0) ? 14 : 0)) / (xDiap * 1.2/*Запас, чтобы красиво было*/);
+	double ky = (double)(rect.bottom - (rect.top + (minY >= 0 || maxY <= 0) ? 14 : 0)) / (yDiap * 1.2/*Запас, чтобы красиво было*/);
 
 
 	// Сдвиг графика относительно окна
-	int dx = (minX >= 0) ? ((maxX == 0) ? (rect.right / 2) : stepX*kx) : ((maxX <= 0) ? (rect.right - stepX*kx) : abs(minX * kx - stepX*kx));
-	int dy = (minY >= 0) ? ((maxY == 0) ? (rect.bottom / 2) : stepY*ky) : ((maxY <= 0) ? (rect.bottom - stepY*ky) : abs(minY * ky - stepY*ky));
+	int dx = (int)((minX >= 0) ? ((maxX == 0) ? (rect.right / 2) : stepX*kx) : ((maxX <= 0) ? (rect.right - stepX*kx) : abs(minX * kx - stepX*kx)));
+	int dy = (int)((minY >= 0) ? ((maxY == 0) ? (rect.bottom / 2) : stepY*ky) : ((maxY <= 0) ? (rect.bottom - stepY*ky) : abs(minY * ky - stepY*ky)));
 
 	dc->SelectObject(netBrush);	// Подключаем перо для рисования графиков
 
 	// Сетка значений на осях
 	// X
 	if (abs(stepX) > ACCURACY){ // если шаг не равен 0
-		for (float x = rect.left + dx; x > rect.left; x -= (stepX * kx)){
-			dc->MoveTo({ (int)x, rect.top });
-			dc->LineTo({ (int)x, rect.bottom });
+		for (int x = rect.left + dx; x > rect.left; x -= (int)(stepX * kx)){
+			dc->MoveTo({ x, rect.top });
+			dc->LineTo({ x, rect.bottom });
 		}
-		for (float x = rect.left + dx; x < rect.right; x += (stepX * kx)){
-			dc->MoveTo({ (int)x, rect.top });
-			dc->LineTo({ (int)x, rect.bottom });
+		for (int x = rect.left + dx; x < rect.right; x += (int)(stepX * kx)){
+			dc->MoveTo({ x, rect.top });
+			dc->LineTo({ x, rect.bottom });
 		}
 	}
 	// Y
 	if (abs(stepY) > ACCURACY){ // если шаг не равен 0
-		for (float y = rect.bottom - dy; y > rect.top; y -= (stepY * ky)){
-			dc->MoveTo({ rect.left, (int)y });
-			dc->LineTo({ rect.right, (int)y });
+		for (int y = rect.bottom - dy; y > rect.top; y -= (int)(stepY * ky)){
+			dc->MoveTo({ rect.left, y });
+			dc->LineTo({ rect.right, y });
 		}
-		for (float y = rect.bottom - dy; y < rect.bottom; y += (stepY * ky)){
-			dc->MoveTo({ rect.left, (int)y });
-			dc->LineTo({ rect.right, (int)y });
+		for (int y = rect.bottom - dy; y < rect.bottom; y += (int)(stepY * ky)){
+			dc->MoveTo({ rect.left, y });
+			dc->LineTo({ rect.right, y });
 		}
 	}
 
@@ -290,8 +311,10 @@ void CPhysics2Dlg::writeGraphic(CAnimateCtrl & graphCtrl, std::vector<std::pair<
 			moveLine = true;
 			continue;
 		}
-		if (i && ((isinf(XY[i].first) && isinf(XY[i - 1].first)) || (isinf(XY[i].second) && isinf(XY[i - 1].second))))	// или две подряд идущие бесконечности
+		if (i && ((isinf(XY[i].first) && isinf(XY[i - 1].first)) || (isinf(XY[i].second) && isinf(XY[i - 1].second)))){	// или две подряд идущие бесконечности
 			moveLine = true; // то делаем разрыв
+			continue;
+		}
 
 		// Рассчитваем координаты точки в окне
 		POINT pI, pO;
@@ -305,12 +328,12 @@ void CPhysics2Dlg::writeGraphic(CAnimateCtrl & graphCtrl, std::vector<std::pair<
 
 			// сдвигаем по x в сторону предыдущей точки
 			int k = 1;
-			float sum = XY[i].first;
+			double sum = XY[i].first;
 			if (i && isfinite(XY[i - 1].first) && isfinite(XY[i - 1].second)){ // Если есть предыдущая точка
 				sum += 7 * XY[i - 1].first;	 // то сдвигаем точку в её сторону
 				k += 7;
 			}
-			pI.x = rect.left + dx + sum / k * kx;
+			pI.x = (int)(rect.left + dx + sum / k * kx);
 
 			// сдвигаем по x в сторону следующей точки
 			k = 1;
@@ -319,7 +342,7 @@ void CPhysics2Dlg::writeGraphic(CAnimateCtrl & graphCtrl, std::vector<std::pair<
 				sum += 7 * XY[i + 1].first;					// то сдвигаем точку в её сторону
 				k += 7;
 			}
-			pO.x = rect.left + dx + sum / k * kx;
+			pO.x = (int)(rect.left + dx + sum / k * kx);
 		}
 		else if (isinf(XY[i].first)){ // Если график по x уходит в бесконечность
 			// сначала урезаем его до границы окна
@@ -330,12 +353,12 @@ void CPhysics2Dlg::writeGraphic(CAnimateCtrl & graphCtrl, std::vector<std::pair<
 
 			// сдвигаем по y в сторону предыдущей точки
 			int k = 1;
-			float sum = XY[i].second;
+			double sum = XY[i].second;
 			if (i && isfinite(XY[i - 1].first) && isfinite(XY[i - 1].second)){ // Если есть предыдущая точка
 				sum += 7 * XY[i - 1].second;	 // то сдвигаем точку в её сторону
 				k += 7;
 			}
-			pI.y = rect.bottom - dy - sum / k * ky;
+			pI.y = (int)(rect.bottom - dy - sum / k * ky);
 
 			// сдвигаем по y в сторону следующей точки
 			k = 1;
@@ -344,21 +367,21 @@ void CPhysics2Dlg::writeGraphic(CAnimateCtrl & graphCtrl, std::vector<std::pair<
 				sum += 7 * XY[i + 1].second;	 // то сдвигаем точку в её сторону
 				k += 7;
 			}
-			pO.y = rect.bottom - dy - sum / k * ky;
+			pO.y = (int)(rect.bottom - dy - sum / k * ky);
 		}
 		else{ // Если это обычная точка графика, то линии входащая и исходящая пересекаются в этой точке
-			pI.x = pO.x = rect.left + dx + XY[i].first * kx;
-			pI.y = pO.y = rect.bottom - dy - XY[i].second * ky;
+			pI.x = pO.x = (int)(rect.left + dx + XY[i].first * kx);
+			pI.y = pO.y = (int)(rect.bottom - dy - XY[i].second * ky);
 		}
 
 
 		// Делаем разрыв или рисуем линию
-		if (moveLine)
+		if (moveLine){
 			moveLine = false;
+			dc->MoveTo(pO);
+		}
 		else
 			dc->LineTo(pI);
-
-		dc->MoveTo(pO);
 	}
 
 	// Отображаем значения шагов
@@ -369,7 +392,7 @@ void CPhysics2Dlg::writeGraphic(CAnimateCtrl & graphCtrl, std::vector<std::pair<
 	textX = rect.left + dx;
 	textY = rect.bottom - dy;
 	if (numX[0] == '-'){ // III четверь
-		textX -= (stepX * kx) + (numX.GetLength() - 1) * 7;
+		textX -= (int)((stepX * kx) + (numX.GetLength() - 1) * 7);
 		textY += 3;
 	}
 	else if (numX == L"0"){ // Если x == 0
@@ -377,7 +400,7 @@ void CPhysics2Dlg::writeGraphic(CAnimateCtrl & graphCtrl, std::vector<std::pair<
 		textY += 3;
 	}
 	else{	// I четверь
-		textX += (stepX * kx) - 7;
+		textX += (int)(stepX * kx) - 7;
 		textY -= 15;
 	}
 	// отображаем значение шага
@@ -390,7 +413,7 @@ void CPhysics2Dlg::writeGraphic(CAnimateCtrl & graphCtrl, std::vector<std::pair<
 	textY = rect.bottom - dy;
 	if (numY[0] == '-'){ // IV четверь
 		textX += 3;
-		textY += stepY * ky + 7 * MAX2(numY.GetLength() - 2, 0);
+		textY += (int)(stepY * ky + 7 * MAX2(numY.GetLength() - 2, 0));
 	}
 	else if (numY == L"0"){ // Если y == 0
 		textX -= 3;
@@ -398,7 +421,7 @@ void CPhysics2Dlg::writeGraphic(CAnimateCtrl & graphCtrl, std::vector<std::pair<
 	}
 	else{	// II четверь
 		textX -= 15;
-		textY -= stepY * ky - 7;
+		textY -= (int)(stepY * ky) - 7;
 	}
 	// отображаем значение шага
 	dc->TextOutW(textX, textY, numY);
@@ -412,16 +435,51 @@ void CPhysics2Dlg::OnBnClickedCalc()
 	CString exprX, exprY, exprF;
 	std::vector<Token> tokensX, tokensY, tokensF;
 	std::vector<Token> postfixX, postfixY, postfixF;
-	std::vector<std::pair<float, float>> vals, valsX, valsY, valsXY;
+	std::vector<std::pair<double, double>> vals, valsX, valsY, valsXY;
 
 	CString tmp;
 
-	tStValCtrl.GetWindowTextW(tmp);
-	float stVal = _wtof(tmp);
-	tEdValCtrl.GetWindowTextW(tmp);
-	float edVal = _wtof(tmp);
-	tStepValCtrl.GetWindowTextW(tmp);
-	float stepVal = _wtof(tmp);
+	// границы абсциссы
+	abscStValCtrl.GetWindowTextW(tmp);
+	double abscStVal = (double)_wtof(tmp);
+	if (abscStVal > 0){
+		abscStVal = 0;
+		abscStValCtrl.SetWindowTextW(L"0");
+	}
+	abscEdValCtrl.GetWindowTextW(tmp);
+	double abscEdVal = (double)_wtof(tmp);
+	if (abscEdVal < 0){
+		abscEdVal = 0;
+		abscEdValCtrl.SetWindowTextW(L"0");
+	}
+
+	// ординаты
+	ordStValCtrl.GetWindowTextW(tmp);
+	double ordStVal = (tmp.IsEmpty()) ? NAN : (double)_wtof(tmp);
+	if (isfinite(ordStVal) && ordStVal > 0){
+		ordStVal = 0;
+		ordStValCtrl.SetWindowTextW(L"0");
+	}
+	ordEdValCtrl.GetWindowTextW(tmp);
+	double ordEdVal = (tmp.IsEmpty()) ? NAN : (double)_wtof(tmp);
+	if (isfinite(ordEdVal) && ordEdVal < 0){
+		ordEdVal = 0;
+		ordEdValCtrl.SetWindowTextW(L"0");
+	}
+
+	if (abscStVal > abscEdVal){
+		MessageBox(L"Ошибка, начальное значение абсциссы больше конечного!");
+		return;
+	}
+
+	if (ordStVal > ordEdVal){
+		MessageBox(L"Ошибка, начальное значение ординаты больше конечного!");
+		return;
+	}
+	
+	//fprintf(logFile, "stOrd: %f\t edOrd: %f\tstAbsc: %f\t edAbsc: %f\t\n", ordStVal, ordEdVal, abscStVal, abscEdVal);
+
+	FRECT valRect = { abscStVal, ordEdVal, abscEdVal, ordStVal };
 	
 	switch (radio){
 	case 0: // Выбрана двумерная система координат
@@ -430,22 +488,22 @@ void CPhysics2Dlg::OnBnClickedCalc()
 			xVarEditCtrl.GetWindowTextW(exprX);
 			if (createTokensFromExpression(exprX, tokensX))
 				if (createPostfixFromTokens(postfixX, tokensX)){
-					valsX = getVals(calculate, postfixX, stVal, edVal, stepVal);	// Рассчитываем значения x(t),
-					writeGraphic(graphicCtrl, valsX);		// выводим их на график
+					valsX = getVals(calculate, postfixX, abscStVal, abscEdVal);	// Рассчитываем значения x(t),
+					writeGraphic(graphicCtrl, valsX, valRect);		// выводим их на график
 					graphicCtrl.UpdateWindow();				// и перерисовываем окно
 					
-					SetSymb(0, LG_2D_XT); // Выводим необходимые символы
+					SetSymb(LG_2D_XT); // Выводим необходимые символы
 				}
 			break;
 		case LG_2D_YT:	// График y(t)
 			yVarEditCtrl.GetWindowTextW(exprY);
 			if (createTokensFromExpression(exprY, tokensY))
 				if (createPostfixFromTokens(postfixY, tokensY)){
-					valsY = getVals(calculate, postfixY, stVal, edVal, stepVal);	// Рассчитываем значения y(t),
-					writeGraphic(graphicCtrl, valsY);		// выводим их на график
+					valsY = getVals(calculate, postfixY, abscStVal, abscEdVal);	// Рассчитываем значения y(t),
+					writeGraphic(graphicCtrl, valsY, valRect);		// выводим их на график
 					graphicCtrl.UpdateWindow();				// и перерисовываем окно
 
-					SetSymb(0, LG_2D_YT); // Выводим необходимые символы
+					SetSymb(LG_2D_YT); // Выводим необходимые символы
 				}
 			break;
 		case LG_2D_VT:	// График V(t)
@@ -453,11 +511,11 @@ void CPhysics2Dlg::OnBnClickedCalc()
 			yVarEditCtrl.GetWindowTextW(exprY);
 			if (createTokensFromExpression(exprX, tokensX) && createTokensFromExpression(exprY, tokensY)) // Получаем токены из строк
 				if (createPostfixFromTokens(postfixX, tokensX) && createPostfixFromTokens(postfixY, tokensY)){	// Получаем выражения из токенов
-					vals = getVals(speed, postfixX, postfixY, stVal, edVal, stepVal);	// Рассчитываем значения скорости,
-					writeGraphic(graphicCtrl, vals);
+					vals = getVals(speed, postfixX, postfixY, abscStVal, abscEdVal);	// Рассчитываем значения скорости,
+					writeGraphic(graphicCtrl, vals, valRect);
 					graphicCtrl.UpdateWindow();					// и перерисовываем окно
 
-					SetSymb(0, LG_2D_VT); // Выводим необходимые символы
+					SetSymb(LG_2D_VT); // Выводим необходимые символы
 				}
 			break;
 		case LG_2D_AT:	// График a(t)
@@ -465,11 +523,11 @@ void CPhysics2Dlg::OnBnClickedCalc()
 			yVarEditCtrl.GetWindowTextW(exprY);
 			if (createTokensFromExpression(exprX, tokensX) && createTokensFromExpression(exprY, tokensY)) // Получаем токены из строк
 				if (createPostfixFromTokens(postfixX, tokensX) && createPostfixFromTokens(postfixY, tokensY)){	// Получаем выражения из токенов
-					vals = getVals(acceleration, postfixX, postfixY, stVal, edVal, stepVal);	// Рассчитываем значения ускорения,
-					writeGraphic(graphicCtrl, vals);					// выводим их на график
+					vals = getVals(acceleration, postfixX, postfixY, abscStVal, abscEdVal);	// Рассчитываем значения ускорения,
+					writeGraphic(graphicCtrl, vals, valRect);					// выводим их на график
 					graphicCtrl.UpdateWindow();							// и перерисовываем окно
 
-					SetSymb(0, LG_2D_AT); // Выводим необходимые символы
+					SetSymb(LG_2D_AT); // Выводим необходимые символы
 				}
 			break;
 		case LG_2D_ATT:	// График aт(t)
@@ -477,11 +535,11 @@ void CPhysics2Dlg::OnBnClickedCalc()
 			yVarEditCtrl.GetWindowTextW(exprY);
 			if (createTokensFromExpression(exprX, tokensX) && createTokensFromExpression(exprY, tokensY)) // Получаем токены из строк
 				if (createPostfixFromTokens(postfixX, tokensX) && createPostfixFromTokens(postfixY, tokensY)){	// Получаем выражения из токенов
-					vals = getVals(accelerationT, postfixX, postfixY, stVal, edVal, stepVal);	// Рассчитываем значения ускорения,
-					writeGraphic(graphicCtrl, vals);					// выводим их на график
+					vals = getVals(accelerationT, postfixX, postfixY, abscStVal, abscEdVal);	// Рассчитываем значения ускорения,
+					writeGraphic(graphicCtrl, vals, valRect);					// выводим их на график
 					graphicCtrl.UpdateWindow();							// и перерисовываем окно
 
-					SetSymb(0, LG_2D_ATT); // Выводим необходимые символы
+					SetSymb(LG_2D_ATT); // Выводим необходимые символы
 				}
 			break;
 		case LG_2D_ANT:	// График an(t)
@@ -489,11 +547,11 @@ void CPhysics2Dlg::OnBnClickedCalc()
 			yVarEditCtrl.GetWindowTextW(exprY);
 			if (createTokensFromExpression(exprX, tokensX) && createTokensFromExpression(exprY, tokensY)) // Получаем токены из строк
 				if (createPostfixFromTokens(postfixX, tokensX) && createPostfixFromTokens(postfixY, tokensY)){	// Получаем выражения из токенов
-					vals = getVals(accelerationN, postfixX, postfixY, stVal, edVal, stepVal);	// Рассчитываем значения ускорения,
-					writeGraphic(graphicCtrl, vals);					// выводим их на график
+					vals = getVals(accelerationN, postfixX, postfixY, abscStVal, abscEdVal);	// Рассчитываем значения ускорения,
+					writeGraphic(graphicCtrl, vals, valRect);					// выводим их на график
 					graphicCtrl.UpdateWindow();							// и перерисовываем окно
 
-					SetSymb(0, LG_2D_ANT); // Выводим необходимые символы
+					SetSymb(LG_2D_ANT); // Выводим необходимые символы
 				}
 			break;
 		case LG_2D_YX:	// График пути
@@ -501,11 +559,11 @@ void CPhysics2Dlg::OnBnClickedCalc()
 			yVarEditCtrl.GetWindowTextW(exprY);
 			if (createTokensFromExpression(exprX, tokensX) && createTokensFromExpression(exprY, tokensY)) // Получаем токены из строк
 				if (createPostfixFromTokens(postfixX, tokensX) && createPostfixFromTokens(postfixY, tokensY)){	// Получаем выражения из токенов
-					valsX = getVals(calculate, postfixX, stVal, edVal, stepVal);
-					valsY = getVals(calculate, postfixY, stVal, edVal, stepVal);
+					valsX = getVals(calculate, postfixX, abscStVal, abscEdVal);
+					valsY = getVals(calculate, postfixY, abscStVal, abscEdVal);
 
 					// Собираем x(t) и y(t) в y(x)
-					for (int i = 0, j = 0; i < valsX.size() && j < valsY.size(); i++, j++){
+					for (size_t i = 0, j = 0; i < valsX.size() && j < valsY.size(); i++, j++){
 						valsXY.push_back({valsX[i].second, valsY[j].second});
 
 						// Если одному значению t соответствуют два значения x
@@ -519,10 +577,11 @@ void CPhysics2Dlg::OnBnClickedCalc()
 						}
 					}
 
-					writeGraphic(graphicCtrl, valsXY);	// Выводим график пути
+					
+					writeGraphic(graphicCtrl, valsXY, valRect);	// Выводим график пути
 					graphicCtrl.UpdateWindow();					// и перерисовываем окно
 
-					SetSymb(0, LG_2D_YX); // Выводим необходимые символы
+					SetSymb(LG_2D_YX); // Выводим необходимые символы
 				}
 			break;
 		}
@@ -532,65 +591,13 @@ void CPhysics2Dlg::OnBnClickedCalc()
 		break;
 	}
 }
-///////////////////////////////////////////////////////////////////////////////////////////////
-void CPhysics2Dlg::OnBnClickedRadio2d(){
-	listOfGraphsCtrl.ResetContent();
 
-	listOfGraphsCtrl.InsertString(LG_2D_XT,  L"x(t)");
-	listOfGraphsCtrl.InsertString(LG_2D_YT,  L"y(t)");
-	listOfGraphsCtrl.InsertString(LG_2D_VT,	 L"V(t)");
-	listOfGraphsCtrl.InsertString(LG_2D_AT,	 L"a(t)");
-	listOfGraphsCtrl.InsertString(LG_2D_ANT, L"an(t)");
-	listOfGraphsCtrl.InsertString(LG_2D_ATT, L"aт(t)");
-	listOfGraphsCtrl.InsertString(LG_2D_YX,  L"y(x)");
-
-	listOfGraphsCtrl.SetCurSel(0);
-
-	// Устанавливаем нужные символы
-	SetSymb(0, 0);
-
-	//// Поля ввода переменных
-	xVarEditCtrl.EnableWindow(TRUE);
-	yVarEditCtrl.EnableWindow(TRUE);
-	fVarEditCtrl.EnableWindow(FALSE);
-	//
-	xVarEditCtrl.UpdateWindow();
-	yVarEditCtrl.UpdateWindow();
-	fVarEditCtrl.UpdateWindow();
-}
-///////////////////////////////////////////////////////////////////////////////////////////////////
-void CPhysics2Dlg::OnBnClickedRadioRnd()
-{
-	listOfGraphsCtrl.ResetContent();
-	
-	listOfGraphsCtrl.InsertString(LG_RND_FT,  L"φ(t)");
-	listOfGraphsCtrl.InsertString(LG_RND_VT,  L"ω(t)");
-	listOfGraphsCtrl.InsertString(LG_RND_AT,  L"a(t)");
-	listOfGraphsCtrl.InsertString(LG_RND_ANT, L"an(t)");
-	listOfGraphsCtrl.InsertString(LG_RND_ATT, L"aт(t)");
-
-	listOfGraphsCtrl.SetCurSel(0);
-
-	// Устанавливаем нужные символы
-	SetSymb(1, 0);
-
-	//// Поля ввода переменных
-	xVarEditCtrl.EnableWindow(FALSE);
-	yVarEditCtrl.EnableWindow(FALSE);
-	fVarEditCtrl.EnableWindow(TRUE);
-	//
-	xVarEditCtrl.UpdateWindow();
-	yVarEditCtrl.UpdateWindow();
-	fVarEditCtrl.UpdateWindow();
-}
 /////////////////////////////////////////////////////////////////////////////////////////////////
-void CPhysics2Dlg::SetSymb(int familyID, int symbID){
+void CPhysics2Dlg::SetSymb(int symbID){
 	// Скрываем все ненужые символы
 	Symb2D_XCtrl.ShowWindow(SW_HIDE);
 	Symb2D_YCtrl.ShowWindow(SW_HIDE);
-	SymbRND_FCtrl.ShowWindow(SW_HIDE);
 	Symb2D_VCtrl.ShowWindow(SW_HIDE);
-	SymbRND_VCtrl.ShowWindow(SW_HIDE);
 	Symb_AtCtrl.ShowWindow(SW_HIDE);
 	Symb_AnCtrl.ShowWindow(SW_HIDE);
 	Symb_ACtrl.ShowWindow(SW_HIDE);
@@ -598,70 +605,40 @@ void CPhysics2Dlg::SetSymb(int familyID, int symbID){
 	Symb_H_XCtrl.ShowWindow(SW_HIDE);
 	Symb_H_TCtrl.ShowWindow(SW_HIDE);
 	//
-	switch (familyID){
-	case 0:
-		switch (symbID){
-		case LG_2D_XT:
-			Symb2D_XCtrl.ShowWindow(SW_SHOW);
-			Symb_H_TCtrl.ShowWindow(SW_SHOW);
-			break;
-		case LG_2D_YT:
-			Symb2D_YCtrl.ShowWindow(SW_SHOW);
-			Symb_H_TCtrl.ShowWindow(SW_SHOW);
-			break;
-		case LG_2D_VT:
-			Symb2D_VCtrl.ShowWindow(SW_SHOW);
-			Symb_H_TCtrl.ShowWindow(SW_SHOW);
-			break;
-		case LG_2D_AT:
-			Symb_ACtrl.ShowWindow(SW_SHOW);
-			Symb_H_TCtrl.ShowWindow(SW_SHOW);
-			break;
-		case LG_2D_ANT:
-			Symb_AnCtrl.ShowWindow(SW_SHOW);
-			Symb_H_TCtrl.ShowWindow(SW_SHOW);
-			break;
-		case LG_2D_ATT:
-			Symb_AtCtrl.ShowWindow(SW_SHOW);
-			Symb_H_TCtrl.ShowWindow(SW_SHOW);
-			break;
-		case LG_2D_YX:
-			Symb2D_YCtrl.ShowWindow(SW_SHOW);
-			Symb_H_XCtrl.ShowWindow(SW_SHOW);
-			break;
-		}
+	switch (symbID){
+	case LG_2D_XT:
+		Symb2D_XCtrl.ShowWindow(SW_SHOW);
+		Symb_H_TCtrl.ShowWindow(SW_SHOW);
 		break;
-	case 1:
-		switch (symbID){
-		case LG_RND_FT:
-			SymbRND_FCtrl.ShowWindow(SW_SHOW);
-			Symb_H_TCtrl.ShowWindow(SW_SHOW);
-			break;
-		case LG_RND_VT:
-			SymbRND_VCtrl.ShowWindow(SW_SHOW);
-			Symb_H_TCtrl.ShowWindow(SW_SHOW);
-			break;
-		case LG_RND_AT:
-			Symb_ACtrl.ShowWindow(SW_SHOW);
-			Symb_H_TCtrl.ShowWindow(SW_SHOW);
-			break;
-		case LG_RND_ANT:
-			Symb_AnCtrl.ShowWindow(SW_SHOW);
-			Symb_H_TCtrl.ShowWindow(SW_SHOW);
-			break;
-		case LG_RND_ATT:
-			Symb_AtCtrl.ShowWindow(SW_SHOW);
-			Symb_H_TCtrl.ShowWindow(SW_SHOW);
-			break;
-		}
+	case LG_2D_YT:
+		Symb2D_YCtrl.ShowWindow(SW_SHOW);
+		Symb_H_TCtrl.ShowWindow(SW_SHOW);
+		break;
+	case LG_2D_VT:
+		Symb2D_VCtrl.ShowWindow(SW_SHOW);
+		Symb_H_TCtrl.ShowWindow(SW_SHOW);
+		break;
+	case LG_2D_AT:
+		Symb_ACtrl.ShowWindow(SW_SHOW);
+		Symb_H_TCtrl.ShowWindow(SW_SHOW);
+		break;
+	case LG_2D_ANT:
+		Symb_AnCtrl.ShowWindow(SW_SHOW);
+		Symb_H_TCtrl.ShowWindow(SW_SHOW);
+		break;
+	case LG_2D_ATT:
+		Symb_AtCtrl.ShowWindow(SW_SHOW);
+		Symb_H_TCtrl.ShowWindow(SW_SHOW);
+		break;
+	case LG_2D_YX:
+		Symb2D_YCtrl.ShowWindow(SW_SHOW);
+		Symb_H_XCtrl.ShowWindow(SW_SHOW);
 		break;
 	}
 	//
 	Symb2D_XCtrl.UpdateWindow();
 	Symb2D_YCtrl.UpdateWindow();
-	SymbRND_FCtrl.UpdateWindow();
 	Symb2D_VCtrl.UpdateWindow();
-	SymbRND_VCtrl.UpdateWindow();
 	Symb_AtCtrl.UpdateWindow();
 	Symb_AnCtrl.UpdateWindow();
 	Symb_ACtrl.UpdateWindow();

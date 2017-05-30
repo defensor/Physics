@@ -1,9 +1,15 @@
-﻿Build started 19.05.2017 22:19:36.
+﻿Build started 27.05.2017 22:28:14.
      1>Project "F:\GitHub\Physics\Physics\Physics2\Physics2.vcxproj" on node 2 (Build target(s)).
      1>Link:
+         D:\Program Files\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"F:\GitHub\Physics\Physics\Debug\Physics2.exe" /INCREMENTAL /NOLOGO /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /manifestinput:"D:\Program Files\Microsoft Visual Studio 12.0\VC\Include\Manifest\dpiaware.manifest" /DEBUG /PDB:"F:\GitHub\Physics\Physics\Debug\Physics2.pdb" /SUBSYSTEM:WINDOWS /TLBID:1 /ENTRY:"wWinMainCRTStartup" /DYNAMICBASE /NXCOMPAT /IMPLIB:"F:\GitHub\Physics\Physics\Debug\Physics2.lib" /MACHINE:X86 Debug\Physics2.res
+         Debug\Physics2.obj
+         Debug\Physics2Dlg.obj
+         Debug\PhysicsF.obj
+         Debug\stdafx.obj
+         LINK : F:\GitHub\Physics\Physics\Debug\Physics2.exe not found or not built by the last incremental link; performing full link
          Physics2.vcxproj -> F:\GitHub\Physics\Physics\Debug\Physics2.exe
      1>Done Building Project "F:\GitHub\Physics\Physics\Physics2\Physics2.vcxproj" (Build target(s)).
 
 Build succeeded.
 
-Time Elapsed 00:00:00.07
+Time Elapsed 00:00:30.23

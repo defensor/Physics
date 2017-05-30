@@ -10,6 +10,13 @@
 enum{LG_2D_XT = 0, LG_2D_YT, LG_2D_VT, LG_2D_AT, LG_2D_ANT, LG_2D_ATT, LG_2D_YX};
 enum{LG_RND_FT = 0, LG_RND_VT, LG_RND_AT, LG_RND_ANT, LG_RND_ATT};
 
+struct FRECT{
+	double left;
+	double top;
+	double right;
+	double bottom;
+};
+
 // диалоговое окно CPhysics2Dlg
 class CPhysics2Dlg : public CDialogEx
 {
@@ -24,7 +31,7 @@ public:
 	virtual void DoDataExchange(CDataExchange* pDX);	// поддержка DDX/DDV
 
 	// Функции отрисовки графиков
-	void writeGraphic(CAnimateCtrl & graphCntrl, std::vector<std::pair<float, float>> & XY);
+	void writeGraphic(CAnimateCtrl & graphCntrl, std::vector<std::pair<double, double>> & XY, FRECT valRect);
 
 // Реализация
 protected:
@@ -54,21 +61,14 @@ public:
 	CEdit xVarEditCtrl;
 	// Контроллер поля ввода уравнения y(t)
 	CEdit yVarEditCtrl;
-	// Контроллер ввода уравнения ф(t)
-	CEdit fVarEditCtrl;
 
-	// Контроллер графика x(t)
+	// Контроллер графика f(x)
 	CAnimateCtrl graphicCtrl;
-	// Переключение между двумя режимами
-	afx_msg void OnBnClickedRadio2d();
-	afx_msg void OnBnClickedRadioRnd();
 	// Котроллеры обозначений
 	// По вертикали
 	CStatic Symb2D_XCtrl;
 	CStatic Symb2D_YCtrl;
-	CStatic SymbRND_FCtrl;
 	CStatic Symb2D_VCtrl;
-	CStatic SymbRND_VCtrl;
 	CStatic Symb_AtCtrl;
 	CStatic Symb_AnCtrl;
 	CStatic Symb_ACtrl;
@@ -76,11 +76,13 @@ public:
 	CStatic Symb_H_XCtrl;
 	CStatic Symb_H_TCtrl;
 
-	void SetSymb(int familyID, int symbID);
+	void SetSymb(int symbID);
 
 	// Контроллер списка графов
 	CComboBox listOfGraphsCtrl;
-	CEdit tStValCtrl;
-	CEdit tEdValCtrl;
-	CEdit tStepValCtrl;
+	// Поля ввода аргумента
+	CEdit abscStValCtrl;
+	CEdit abscEdValCtrl;
+	CEdit ordStValCtrl;
+	CEdit ordEdValCtrl;
 };
