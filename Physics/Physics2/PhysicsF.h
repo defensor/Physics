@@ -9,8 +9,8 @@
 #include <locale.h>
 #include <math.h>
 
-#define ACCURACY 1e-9
-#define ACCURACYN 1e+9
+#define ACCURACY 1e-7
+#define ACCURACYN 1e+7
 
 #define STEP 1e-3
 
@@ -18,11 +18,15 @@
 #define MIN2(a, b) (((a) < (b)) ? (a) : (b))
 #define MAX3(a,b,c) (MAX2(MAX2((a), (b)), (c)))
 
+namespace my{
+	double correct(double a);
+	double floor(double a);
+}
+
 struct FPOINT{
 	double x;
 	double y;
 };
-
 
 enum tokentype{
 	VAR, NUM, OP_BR, CL_BR, FUNC, OP, OP_SBR, CL_SBR

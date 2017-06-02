@@ -12,7 +12,7 @@ FILE * logFile = fopen("file.log", "w");
 
 // Знаю, что криво, но других идей как то нет
 namespace my{
-	double floor(double a){
+	double correct(double a){
 		if (isnan(a))
 			return a;
 		if (a > 1e+13)
@@ -21,9 +21,12 @@ namespace my{
 			return -INFINITY;
 
 		return a;
-		/*if (!isfinite(a))
+	}
+
+	double floor(double a){
+		if (!isfinite(a))
 			return NAN;
-		return (abs(a) > ACCURACY) ? (std::floor(a * ACCURACYN + .5) / ACCURACYN) : (0);*/
+		return (abs(a) > ACCURACY) ? (std::floor(a * ACCURACYN + .5) / ACCURACYN) : (0);
 	}
 }
 
@@ -391,7 +394,7 @@ double calculate(std::vector<Token> & postfix, double t){
 	double result = fStack.top();
 	fStack.pop();
 
-	return my::floor(result);
+	return my::correct(result);
 }
 
 
@@ -412,12 +415,12 @@ double derivative(double(*pFunc)(std::vector<Token>&, double), std::vector<Token
 		if (isinf(b))
 			return NAN;
 	}
-	a = my::floor(a);
-	b = my::floor(b);
+	a = my::correct(a);
+	b = my::correct(b);
 
 	double d = (a - b) / DT;
 
-	return my::floor(d);
+	return my::correct(d);
 }
 
 double derivative(double(*pFunc)(std::vector<Token>&, std::vector<Token>&, double), std::vector<Token> & postfixX, std::vector<Token> & postfixY, double t){
@@ -443,19 +446,19 @@ double derivative(double(*pFunc)(std::vector<Token>&, std::vector<Token>&, doubl
 		if (isinf(b))
 			return NAN;
 	}
-	a = my::floor(a);
-	b = my::floor(b);
+	a = my::correct(a);
+	b = my::correct(b);
 
-	double d = my::floor(a - b) / DT;
+	double d = my::correct(a - b) / DT;
 
-	return my::floor(d);
+	return my::correct(d);
 }
 
 
 double derivative2(std::vector<Token> & postfix, double t){
-	double a = my::floor(calculate(postfix, t + DT));
-	double b = my::floor(calculate(postfix, t));
-	double c = my::floor(calculate(postfix, t - DT));
+	double a = my::correct(calculate(postfix, t + DT));
+	double b = my::correct(calculate(postfix, t));
+	double c = my::correct(calculate(postfix, t - DT));
 	 
 	if (!(isfinite(a) && isfinite(b) && isfinite(c))){
 		if (isnan(a) || isnan(b) || isnan(c))
@@ -473,24 +476,24 @@ double derivative2(std::vector<Token> & postfix, double t){
 		return NAN;
 	}
 
-	double d2 = my::floor(a - b) / DT;
-	d2 += my::floor(c - b) / DT;
+	double d2 = my::correct(a - b) / DT;
+	d2 += my::correct(c - b) / DT;
 	d2 /= DT;
 
 	//double d2 = (a - b + c - b) / (DT*DT);
 
-	return my::floor(d2);
+	return my::correct(d2);
 }
 
 // Функция рассчитывающая массив значений выражения
 std::vector<std::pair<double, double>> getVals(double(*pFunc)(std::vector<Token>&, double), std::vector<Token> & postfix, double stVal, double edVal){
 	std::vector<std::pair<double, double>> val;
 
-	for (double x = stVal; x <= edVal; x = my::floor(x + STEP)){
+	for (double x = stVal; x <= edVal; x = my::correct(x + STEP)){
 		if (abs(x) < ACCURACY) // Если есть 0, то пусть будет и -0
-			val.push_back({ -x, my::floor(pFunc(postfix, -x)) });
+			val.push_back({ -x, my::correct(pFunc(postfix, -x)) });
 
-		val.push_back({ x, my::floor(pFunc(postfix, x)) });
+		val.push_back({ x, my::correct(pFunc(postfix, x)) });
 	}
 
 	fprintf(logFile, "postfix: ");
@@ -508,10 +511,10 @@ std::vector<std::pair<double, double>> getVals(double(*pFunc)(std::vector<Token>
 std::vector<std::pair<double, double>> getVals(double(*pFunc)(std::vector<Token>&, std::vector<Token>&, double), std::vector<Token> & postfix1, std::vector<Token> & postfix2, double stVal, double edVal){
 	std::vector<std::pair<double, double>> val;
 	
-	for (double x = stVal; x <= edVal; x = my::floor(x + STEP)){
+	for (double x = stVal; x <= edVal; x = my::correct(x + STEP)){
 		if (abs(x) < ACCURACY) // Если есть 0, то пусть будет и -0
-			val.push_back({ -x, my::floor(pFunc(postfix1, postfix2, -x)) });
-		val.push_back({ x, my::floor(pFunc(postfix1, postfix2, x)) });
+			val.push_back({ -x, my::correct(pFunc(postfix1, postfix2, -x)) });
+		val.push_back({ x, my::correct(pFunc(postfix1, postfix2, x)) });
 	}
 
 
@@ -534,8 +537,8 @@ std::vector<std::pair<double, double>> getVals(double(*pFunc)(std::vector<Token>
 
 // Рассчет полной скорости
 double speed(std::vector<Token> & postfixX, std::vector<Token> & postfixY, double t){
-	double Vx = my::floor(derivative(calculate, postfixX, t));
-	double Vy = my::floor(derivative(calculate, postfixY, t));
+	double Vx = my::correct(derivative(calculate, postfixX, t));
+	double Vy = my::correct(derivative(calculate, postfixY, t));
 
 	if (!(isfinite(Vx) && isfinite(Vy))){
 		if (isnan(Vx) || isnan(Vy))
@@ -551,7 +554,7 @@ double speed(std::vector<Token> & postfixX, std::vector<Token> & postfixY, doubl
 			return Vy;
 	}
 
-	double V = my::floor(sqrt(Vx*Vx + Vy*Vy));
+	double V = my::correct(sqrt(Vx*Vx + Vy*Vy));
 	return V;
 }
 
@@ -577,8 +580,8 @@ double angleSpeed(std::vector<Token> & postfixX, std::vector<Token> & postfixY, 
 
 // Рассчет полного ускорения
 double acceleration(std::vector<Token> & postfixX, std::vector<Token> & postfixY, double t){
-	double ax = my::floor(derivative2(postfixX, t));
-	double ay = my::floor(derivative2(postfixY, t));
+	double ax = my::correct(derivative2(postfixX, t));
+	double ay = my::correct(derivative2(postfixY, t));
 
 	if (!(isfinite(ax) && isfinite(ay))){
 		if (isnan(ax) || isnan(ay))
@@ -594,19 +597,19 @@ double acceleration(std::vector<Token> & postfixX, std::vector<Token> & postfixY
 			return abs(ay);
 	}
 
-	double a = my::floor(sqrt(ax*ax + ay*ay));
+	double a = my::correct(sqrt(ax*ax + ay*ay));
 	return a;
 }
 
 // Рассчет тангенциального ускорения
 double accelerationT(std::vector<Token> & postfixX, std::vector<Token> & postfixY, double t){
-	double at = my::floor(derivative(speed, postfixX, postfixY, t));
+	double at = my::correct(derivative(speed, postfixX, postfixY, t));
 	return at;
 }
 
 // Рассчет тангенциального ускорения
 double accelerationN(std::vector<Token> & postfixX, std::vector<Token> & postfixY, double t){
-	double an = my::floor(derivative(angleSpeed, postfixX, postfixY, t));
+	double an = my::correct(derivative(angleSpeed, postfixX, postfixY, t));
 	return an;
 }
 
@@ -631,10 +634,10 @@ double accelerationN(std::vector<Token> & postfixX, std::vector<Token> & postfix
 //		return NAN;
 //	}
 //
-//	a = my::floor(a);
-//	at = my::floor(at);
+//	a = my::correct(a);
+//	at = my::correct(at);
 //
-//	double an = my::floor(sqrt(a*a - at*at));
+//	double an = my::correct(sqrt(a*a - at*at));
 //	return an;
 //}
 

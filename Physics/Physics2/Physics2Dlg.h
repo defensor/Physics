@@ -53,8 +53,6 @@ protected:
 	afx_msg HCURSOR OnQueryDragIcon();
 	DECLARE_MESSAGE_MAP()
 public:
-	// Выбор: двумерные координаты или окружность
-	int radio;
 	// Кнопка "Построить"
 	afx_msg void OnBnClickedCalc();
 	// Контроллер поля ввода X
@@ -85,4 +83,6 @@ public:
 	CEdit abscEdValCtrl;
 	CEdit ordStValCtrl;
 	CEdit ordEdValCtrl;
+	CEdit tStValCtrl;
+	CEdit tEdValCtrl;
 };
