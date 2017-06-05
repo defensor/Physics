@@ -609,59 +609,6 @@ double accelerationT(std::vector<Token> & postfixX, std::vector<Token> & postfix
 
 // Рассчет тангенциального ускорения
 double accelerationN(std::vector<Token> & postfixX, std::vector<Token> & postfixY, double t){
-	double an = my::correct(derivative(angleSpeed, postfixX, postfixY, t));
+	double an = my::correct(angleSpeed(postfixX, postfixY, t)) + my::correct(speed(postfixX, postfixY, t));
 	return an;
 }
-
-// Рассчет нормального ускорения
-//double accelerationN(std::vector<Token> & postfixX, std::vector<Token> & postfixY, double t){
-//	double a = acceleration(postfixX, postfixY, t);
-//	double at = accelerationT(postfixX, postfixY, t);
-//
-//	if (!(isfinite(a) && isfinite(at))){
-//		if (isnan(a) || isnan(at))
-//			return NAN;
-//
-//		if (isinf(a) && isinf(at)) // Если ускорения это две бесконечности
-//			return NAN; // то результат неопределенность
-//		
-//		if (isinf(a))
-//			return abs(a);
-//
-//		if (isinf(at))
-//			return NAN;
-//
-//		return NAN;
-//	}
-//
-//	a = my::correct(a);
-//	at = my::correct(at);
-//
-//	double an = my::correct(sqrt(a*a - at*at));
-//	return an;
-//}
-
-//int main(){
-//	setlocale(LC_CTYPE, "rus");
-//
-//	string expr = "-3 + 4 - [e] * sin(2) + cos(t) / pi^(actg(t/2) - atg(-t/2)) + asin(0.5) * acos(0.4) + sin(cos(3))";
-//	vector<Token> tokens;
-//	vector<Token> postfix;
-//	if (createTokensFromExpression(expr, tokens))
-//		if (createPostfixFromTokens(postfix, tokens)){
-//			for (int i = 0; i < postfix.size(); i++)
-//				printf("%s ", postfix[i].name.c_str());
-//
-//			printf("\n");
-//		}
-//
-//	for (double t = 9.8; t < 1000; t += 5){
-//		cout << "f(" << t << ") = " << calculate(postfix, t) << endl;
-//		cout << "f`(" << t << ") = " << derivative(postfix, t) << endl;
-//		cout << "f``(" << t << ") = " << derivative2(postfix, t) << endl;
-//		cout << endl;
-//	}
-//
-//	return 0;
-//}
-

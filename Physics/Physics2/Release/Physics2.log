@@ -1,9 +1,31 @@
-﻿Build started 02.06.2017 0:25:32.
+﻿Build started 04.06.2017 23:53:05.
      1>Project "F:\GitHub\Physics\Physics\Physics2\Physics2.vcxproj" on node 2 (Build target(s)).
      1>ClCompile:
-         D:\Program Files\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /Zi /nologo /W3 /WX- /O2 /Oi /Oy- /GL /D WIN32 /D _WINDOWS /D NDEBUG /D _UNICODE /D UNICODE /Gm- /EHsc /MT /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Yu"stdafx.h" /Fp"Release\Physics2.pch" /Fo"Release\\" /Fd"Release\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt Physics2Dlg.cpp
+         D:\Program Files\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /Zi /nologo /W3 /WX- /O2 /Oi /Oy- /GL /D WIN32 /D _WINDOWS /D NDEBUG /D _UNICODE /D UNICODE /Gm- /EHsc /MT /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Yu"stdafx.h" /Fp"Release\Physics2.pch" /Fo"Release\\" /Fd"Release\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt Physics2Dlg.cpp PhysicsF.cpp
          Physics2Dlg.cpp
      1>Physics2Dlg.cpp(213): warning C4018: '<' : signed/unsigned mismatch
+         PhysicsF.cpp
+     1>PhysicsF.cpp(11): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+                 D:\Program Files\Microsoft Visual Studio 12.0\VC\include\stdio.h(211) : see declaration of 'fopen'
+     1>PhysicsF.cpp(21): warning C4056: overflow in floating-point constant arithmetic
+     1>PhysicsF.cpp(54): warning C4244: 'argument' : conversion from 'wchar_t' to 'char', possible loss of data
+     1>PhysicsF.cpp(63): warning C4244: 'argument' : conversion from 'wchar_t' to 'char', possible loss of data
+     1>PhysicsF.cpp(73): warning C4018: '<' : signed/unsigned mismatch
+     1>PhysicsF.cpp(95): warning C4018: '<' : signed/unsigned mismatch
+     1>PhysicsF.cpp(100): warning C4244: 'argument' : conversion from 'wchar_t' to 'char', possible loss of data
+     1>PhysicsF.cpp(105): warning C4018: '<' : signed/unsigned mismatch
+     1>PhysicsF.cpp(171): warning C4018: '<' : signed/unsigned mismatch
+     1>PhysicsF.cpp(179): warning C4018: '<' : signed/unsigned mismatch
+     1>PhysicsF.cpp(195): warning C4018: '<' : signed/unsigned mismatch
+     1>PhysicsF.cpp(209): warning C4018: '<' : signed/unsigned mismatch
+     1>PhysicsF.cpp(229): warning C4018: '<' : signed/unsigned mismatch
+     1>PhysicsF.cpp(242): warning C4018: '<' : signed/unsigned mismatch
+     1>PhysicsF.cpp(295): warning C4018: '<' : signed/unsigned mismatch
+     1>PhysicsF.cpp(500): warning C4018: '<' : signed/unsigned mismatch
+     1>PhysicsF.cpp(505): warning C4018: '<' : signed/unsigned mismatch
+     1>PhysicsF.cpp(522): warning C4018: '<' : signed/unsigned mismatch
+     1>PhysicsF.cpp(527): warning C4018: '<' : signed/unsigned mismatch
+     1>PhysicsF.cpp(531): warning C4018: '<' : signed/unsigned mismatch
        Link:
          D:\Program Files\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"F:\GitHub\Physics\Physics\Release\Physics2.exe" /INCREMENTAL:NO /NOLOGO /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /manifestinput:"D:\Program Files\Microsoft Visual Studio 12.0\VC\Include\Manifest\dpiaware.manifest" /DEBUG /PDB:"F:\GitHub\Physics\Physics\Release\Physics2.pdb" /SUBSYSTEM:WINDOWS /OPT:REF /OPT:ICF /LTCG /TLBID:1 /ENTRY:"wWinMainCRTStartup" /DYNAMICBASE /NXCOMPAT /IMPLIB:"F:\GitHub\Physics\Physics\Release\Physics2.lib" /MACHINE:X86 /SAFESEH Release\Physics2.res
          Release\Physics2.obj
@@ -17,4 +39,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:05.67
+Time Elapsed 00:00:30.77
